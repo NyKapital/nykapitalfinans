@@ -12,9 +12,47 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     .filter((acc) => acc.userId === req.userId)
     .map((acc) => acc.id);
 
-  const userPayments = payments
-    .filter((pay) => userAccountIds.includes(pay.accountId))
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  let userPayments = payments
+    .filter((pay) => userAccountIds.includes(pay.accountId));
+
+  // Apply filters
+  const { startDate, endDate, search, category, status, accountId } = req.query;
+
+  if (accountId) {
+    userPayments = userPayments.filter((pay) => pay.accountId === accountId);
+  }
+
+  if (startDate) {
+    const start = new Date(startDate as string);
+    userPayments = userPayments.filter((pay) => pay.createdAt >= start);
+  }
+
+  if (endDate) {
+    const end = new Date(endDate as string);
+    end.setHours(23, 59, 59, 999);
+    userPayments = userPayments.filter((pay) => pay.createdAt <= end);
+  }
+
+  if (search) {
+    const searchLower = (search as string).toLowerCase();
+    userPayments = userPayments.filter(
+      (pay) =>
+        pay.recipientName.toLowerCase().includes(searchLower) ||
+        pay.description.toLowerCase().includes(searchLower) ||
+        pay.reference.toLowerCase().includes(searchLower)
+    );
+  }
+
+  if (category) {
+    userPayments = userPayments.filter((pay) => pay.category === category);
+  }
+
+  if (status) {
+    userPayments = userPayments.filter((pay) => pay.status === status);
+  }
+
+  // Sort by date descending
+  userPayments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   res.json(userPayments);
 });

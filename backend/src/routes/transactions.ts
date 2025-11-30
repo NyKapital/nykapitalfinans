@@ -12,9 +12,51 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     .filter((acc) => acc.userId === req.userId)
     .map((acc) => acc.id);
 
-  const userTransactions = transactions
-    .filter((tx) => userAccountIds.includes(tx.accountId))
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  let userTransactions = transactions
+    .filter((tx) => userAccountIds.includes(tx.accountId));
+
+  // Apply filters
+  const { startDate, endDate, search, category, minAmount, maxAmount, accountId } = req.query;
+
+  if (accountId) {
+    userTransactions = userTransactions.filter((tx) => tx.accountId === accountId);
+  }
+
+  if (startDate) {
+    const start = new Date(startDate as string);
+    userTransactions = userTransactions.filter((tx) => tx.createdAt >= start);
+  }
+
+  if (endDate) {
+    const end = new Date(endDate as string);
+    end.setHours(23, 59, 59, 999);
+    userTransactions = userTransactions.filter((tx) => tx.createdAt <= end);
+  }
+
+  if (search) {
+    const searchLower = (search as string).toLowerCase();
+    userTransactions = userTransactions.filter(
+      (tx) =>
+        tx.counterparty.toLowerCase().includes(searchLower) ||
+        tx.description.toLowerCase().includes(searchLower) ||
+        (tx.reference && tx.reference.toLowerCase().includes(searchLower))
+    );
+  }
+
+  if (category) {
+    userTransactions = userTransactions.filter((tx) => tx.category === category);
+  }
+
+  if (minAmount) {
+    userTransactions = userTransactions.filter((tx) => Math.abs(tx.amount) >= Number(minAmount));
+  }
+
+  if (maxAmount) {
+    userTransactions = userTransactions.filter((tx) => Math.abs(tx.amount) <= Number(maxAmount));
+  }
+
+  // Sort by date descending
+  userTransactions.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   res.json(userTransactions);
 });
