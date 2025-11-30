@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, FileText, Eye, Mail, Check } from 'lucide-react';
+import { Plus, FileText, Eye, Mail, Check, Download } from 'lucide-react';
 import api from '../services/api';
 import { Invoice } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
@@ -30,6 +30,27 @@ const Invoices: React.FC = () => {
       fetchInvoices();
     } catch (error) {
       console.error('Error updating invoice:', error);
+    }
+  };
+
+  const downloadPDF = async (invoice: Invoice) => {
+    try {
+      const response = await api.get(`/api/invoices/${invoice.id}/pdf`, {
+        responseType: 'blob',
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `faktura_${invoice.invoiceNumber}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Kunne ikke downloade PDF');
     }
   };
 
@@ -154,6 +175,13 @@ const Invoices: React.FC = () => {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => downloadPDF(invoice)}
+                      className="p-1 text-primary-400 hover:text-primary-600"
+                      title="Download PDF"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
                     <button className="p-1 text-gray-400 hover:text-gray-600">
                       <Eye className="w-4 h-4" />
                     </button>
