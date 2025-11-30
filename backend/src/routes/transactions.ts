@@ -1,6 +1,8 @@
 import express, { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { transactions, accounts } from '../data/mockData';
 import { authenticate, AuthRequest } from '../middleware/auth';
+import { Transaction } from '../types';
 
 const router = express.Router();
 
@@ -33,6 +35,51 @@ router.get('/account/:accountId', authenticate, (req: AuthRequest, res: Response
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   res.json(accountTransactions);
+});
+
+// Receive payment (incoming transaction)
+router.post('/receive', authenticate, (req: AuthRequest, res: Response): void => {
+  const {
+    accountId,
+    amount,
+    description,
+    counterparty,
+    reference,
+    category,
+  } = req.body;
+
+  // Verify account belongs to user
+  const account = accounts.find(
+    (acc) => acc.id === accountId && acc.userId === req.userId
+  );
+
+  if (!account) {
+    res.status(404).json({ error: 'Account not found' });
+    return;
+  }
+
+  // Add to account balance
+  account.balance += amount;
+
+  // Create incoming transaction
+  const transaction: Transaction = {
+    id: uuidv4(),
+    accountId,
+    type: 'incoming',
+    amount,
+    currency: account.currency,
+    description,
+    counterparty,
+    reference,
+    category,
+    status: 'completed',
+    createdAt: new Date(),
+    completedAt: new Date(),
+  };
+
+  transactions.push(transaction);
+
+  res.status(201).json(transaction);
 });
 
 export default router;

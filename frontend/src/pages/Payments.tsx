@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Send } from 'lucide-react';
+import { Plus, Send, CheckCircle } from 'lucide-react';
 import api from '../services/api';
-import { Payment, Account } from '../types';
+import { Payment, Account, TransactionCategory } from '../types';
 import { formatCurrency, formatDateTime } from '../utils/formatters';
+import { categoryLabels } from '../utils/categories';
 
 const Payments: React.FC = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -16,7 +17,9 @@ const Payments: React.FC = () => {
     amount: '',
     description: '',
     reference: '',
+    category: '' as TransactionCategory | '',
   });
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -46,6 +49,7 @@ const Payments: React.FC = () => {
       await api.post('/api/payments', {
         ...formData,
         amount: parseFloat(formData.amount),
+        category: formData.category || undefined,
       });
       setShowForm(false);
       setFormData({
@@ -55,10 +59,14 @@ const Payments: React.FC = () => {
         amount: '',
         description: '',
         reference: '',
+        category: '',
       });
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating payment:', error);
+      alert(error.response?.data?.error || 'Fejl ved oprettelse af betaling');
     }
   };
 
@@ -68,6 +76,14 @@ const Payments: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Success notification */}
+      {showSuccess && (
+        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-2">
+          <CheckCircle className="w-5 h-5" />
+          <span>Betaling gennemført! Saldo opdateret.</span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Betalinger</h1>
@@ -156,16 +172,37 @@ const Payments: React.FC = () => {
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Reference (valgfri)
-              </label>
-              <input
-                type="text"
-                value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kategori (valgfri)
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value as TransactionCategory })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">Vælg kategori...</option>
+                  {Object.entries(categoryLabels)
+                    .filter(([key]) => !['sales', 'services', 'consulting'].includes(key))
+                    .map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Reference (valgfri)
+                </label>
+                <input
+                  type="text"
+                  value={formData.reference}
+                  onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
             </div>
             <div className="flex gap-3">
               <button

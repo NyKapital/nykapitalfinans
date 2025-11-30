@@ -1,8 +1,8 @@
 import express, { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { payments, accounts } from '../data/mockData';
+import { payments, accounts, transactions } from '../data/mockData';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { Payment } from '../types';
+import { Payment, Transaction } from '../types';
 
 const router = express.Router();
 
@@ -57,12 +57,34 @@ router.post('/', authenticate, (req: AuthRequest, res: Response): void => {
     currency: currency || account.currency,
     description,
     reference,
-    status: 'pending',
+    category: req.body.category,
+    status: 'completed', // Process immediately for MVP
     createdAt: new Date(),
     scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
   };
 
   payments.push(newPayment);
+
+  // Deduct from account balance
+  account.balance -= amount;
+
+  // Create corresponding transaction
+  const transaction: Transaction = {
+    id: uuidv4(),
+    accountId,
+    type: 'outgoing',
+    amount: -amount,
+    currency: currency || account.currency,
+    description,
+    counterparty: recipientName,
+    reference,
+    category: req.body.category,
+    status: 'completed',
+    createdAt: new Date(),
+    completedAt: new Date(),
+  };
+
+  transactions.push(transaction);
 
   res.status(201).json(newPayment);
 });
