@@ -6,8 +6,10 @@ import { formatCurrency, formatDateTime } from '../utils/formatters';
 import { getCategoryLabel, getCategoryColor, categoryLabels } from '../utils/categories';
 import DateRangeFilter from '../components/DateRangeFilter';
 import { DateRange } from '../utils/dateUtils';
+import { useToast } from '../context/ToastContext';
 
 const Transactions: React.FC = () => {
+  const toast = useToast();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,9 +71,39 @@ const Transactions: React.FC = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      toast.success('Transaktioner eksporteret som CSV');
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Kunne ikke eksportere transaktioner');
+      toast.error('Kunne ikke eksportere transaktioner');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    setExporting(true);
+    try {
+      const params: any = {};
+      if (dateRange?.startDate) params.startDate = dateRange.startDate;
+      if (dateRange?.endDate) params.endDate = dateRange.endDate;
+
+      const response = await api.get('/api/export/xlsx', {
+        params,
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `transaktioner_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Transaktioner eksporteret som Excel');
+    } catch (error) {
+      console.error('Error exporting Excel:', error);
+      toast.error('Kunne ikke eksportere transaktioner');
     } finally {
       setExporting(false);
     }
@@ -104,14 +136,24 @@ const Transactions: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Transaktioner</h1>
           <p className="text-gray-500">Oversigt over alle dine transaktioner</p>
         </div>
-        <button
-          onClick={handleExportCSV}
-          disabled={exporting}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2 disabled:opacity-50"
-        >
-          <Download className="w-4 h-4" />
-          {exporting ? 'Eksporterer...' : 'Eksporter CSV'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExportCSV}
+            disabled={exporting}
+            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? 'Eksporterer...' : 'CSV'}
+          </button>
+          <button
+            onClick={handleExportExcel}
+            disabled={exporting}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            {exporting ? 'Eksporterer...' : 'Excel'}
+          </button>
+        </div>
       </div>
 
       {/* Search and Filter Toggle */}
