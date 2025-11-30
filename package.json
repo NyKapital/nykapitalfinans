@@ -1,0 +1,24 @@
+{
+  "name": "nykapital-finans",
+  "version": "1.0.0",
+  "description": "Account Management MVP for Danish Merchants",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend & npm run dev --workspace=backend",
+    "build": "npm run build --workspaces",
+    "frontend": "npm run dev --workspace=frontend",
+    "backend": "npm run dev --workspace=backend"
+  },
+  "keywords": [
+    "fintech",
+    "accounting",
+    "merchant-services",
+    "denmark"
+  ],
+  "author": "NyKapital Finans",
+  "license": "Apache-2.0"
+}
