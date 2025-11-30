@@ -239,6 +239,16 @@ export const invoices: Invoice[] = [
     dueDate: new Date('2024-12-15'),
     createdAt: new Date('2024-11-01'),
     paidAt: new Date('2024-11-28'),
+    amountPaid: 21250.00,
+    payments: [
+      {
+        id: 'pay-inv-1-1',
+        amount: 21250.00,
+        date: new Date('2024-11-28'),
+        method: 'Bank Transfer',
+        reference: 'INV-2024-001',
+      },
+    ],
   },
   {
     id: 'inv-2',
@@ -262,6 +272,8 @@ export const invoices: Invoice[] = [
     status: 'sent',
     dueDate: new Date('2024-12-20'),
     createdAt: new Date('2024-11-15'),
+    amountPaid: 0,
+    payments: [],
   },
   {
     id: 'inv-3',
@@ -284,5 +296,47 @@ export const invoices: Invoice[] = [
     status: 'overdue',
     dueDate: new Date('2024-11-25'),
     createdAt: new Date('2024-11-01'),
+    amountPaid: 0,
+    payments: [],
+  },
+  {
+    id: 'inv-4',
+    userId: '1',
+    invoiceNumber: '2024-004',
+    customerName: 'Aarhus Tech A/S',
+    customerEmail: 'payment@aarhustech.dk',
+    customerCVR: '55667788',
+    items: [
+      {
+        description: 'IT Support & Vedligehold',
+        quantity: 10,
+        unitPrice: 1000.00,
+        total: 10000.00,
+      },
+    ],
+    subtotal: 10000.00,
+    tax: 2500.00,
+    total: 12500.00,
+    currency: 'DKK',
+    status: 'partially_paid',
+    dueDate: new Date('2024-12-10'),
+    createdAt: new Date('2024-11-10'),
+    amountPaid: 5000.00,
+    payments: [
+      {
+        id: 'pay-inv-4-1',
+        amount: 3000.00,
+        date: new Date('2024-11-20'),
+        method: 'Bank Transfer',
+        reference: 'Partial-1',
+      },
+      {
+        id: 'pay-inv-4-2',
+        amount: 2000.00,
+        date: new Date('2024-11-25'),
+        method: 'MobilePay',
+        reference: 'Partial-2',
+      },
+    ],
   },
 ];

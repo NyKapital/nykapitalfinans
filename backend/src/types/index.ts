@@ -85,6 +85,14 @@ export interface RecurringPayment {
   lastPaymentId?: string;
 }
 
+export interface InvoicePayment {
+  id: string;
+  amount: number;
+  date: Date;
+  method?: string;
+  reference?: string;
+}
+
 export interface Invoice {
   id: string;
   userId: string;
@@ -97,10 +105,12 @@ export interface Invoice {
   tax: number;
   total: number;
   currency: string;
-  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'partially_paid';
   dueDate: Date;
   createdAt: Date;
   paidAt?: Date;
+  amountPaid: number;
+  payments: InvoicePayment[];
 }
 
 export interface InvoiceItem {

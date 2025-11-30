@@ -65,6 +65,8 @@ router.post('/', authenticate, (req: AuthRequest, res: Response): void => {
     status: 'draft',
     dueDate: new Date(dueDate),
     createdAt: new Date(),
+    amountPaid: 0,
+    payments: [],
   };
 
   invoices.push(newInvoice);
@@ -93,6 +95,58 @@ router.patch('/:id', authenticate, (req: AuthRequest, res: Response): void => {
   }
 
   res.json(invoice);
+});
+
+// Record payment for invoice
+router.post('/:id/payments', authenticate, (req: AuthRequest, res: Response): void => {
+  const invoice = invoices.find(
+    (inv) => inv.id === req.params.id && inv.userId === req.userId
+  );
+
+  if (!invoice) {
+    res.status(404).json({ error: 'Invoice not found' });
+    return;
+  }
+
+  const { amount, method, reference } = req.body;
+
+  if (!amount || amount <= 0) {
+    res.status(400).json({ error: 'Invalid payment amount' });
+    return;
+  }
+
+  const remainingAmount = invoice.total - invoice.amountPaid;
+
+  if (amount > remainingAmount) {
+    res.status(400).json({
+      error: 'Payment amount exceeds remaining balance',
+      remainingAmount
+    });
+    return;
+  }
+
+  // Create payment record
+  const payment = {
+    id: uuidv4(),
+    amount,
+    date: new Date(),
+    method: method || 'Bank Transfer',
+    reference: reference || '',
+  };
+
+  // Add payment to invoice
+  invoice.payments.push(payment);
+  invoice.amountPaid += amount;
+
+  // Update invoice status based on payment
+  if (invoice.amountPaid >= invoice.total) {
+    invoice.status = 'paid';
+    invoice.paidAt = new Date();
+  } else if (invoice.amountPaid > 0) {
+    invoice.status = 'partially_paid';
+  }
+
+  res.status(201).json(invoice);
 });
 
 // Download invoice as PDF
