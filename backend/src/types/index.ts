@@ -110,6 +110,16 @@ export interface InvoiceItem {
   total: number;
 }
 
+export interface Budget {
+  id: string;
+  userId: string;
+  category: TransactionCategory;
+  amount: number; // Monthly budget amount
+  period: 'monthly';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface AuthRequest extends Express.Request {
   userId?: string;
 }
