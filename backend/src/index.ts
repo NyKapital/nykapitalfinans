@@ -10,6 +10,7 @@ import analyticsRoutes from './routes/analytics';
 import recurringPaymentRoutes from './routes/recurringPayments';
 import exportRoutes from './routes/export';
 import budgetRoutes from './routes/budgets';
+import taxRoutes from './routes/tax';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/recurring-payments', recurringPaymentRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/budgets', budgetRoutes);
+app.use('/api/tax', taxRoutes);
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
