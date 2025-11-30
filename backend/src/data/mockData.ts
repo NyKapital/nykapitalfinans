@@ -1,4 +1,4 @@
-import { User, Account, Transaction, Invoice, Payment, RecurringPayment } from '../types';
+import { User, Account, Transaction, Invoice, Payment, RecurringPayment, Budget } from '../types';
 import bcrypt from 'bcryptjs';
 
 // Mock data storage (in-memory for MVP)
@@ -338,5 +338,53 @@ export const invoices: Invoice[] = [
         reference: 'Partial-2',
       },
     ],
+  },
+];
+
+export const budgets: Budget[] = [
+  {
+    id: 'budget-1',
+    userId: '1',
+    category: 'marketing',
+    amount: 5000.00,
+    period: 'monthly',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  },
+  {
+    id: 'budget-2',
+    userId: '1',
+    category: 'salary',
+    amount: 15000.00,
+    period: 'monthly',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  },
+  {
+    id: 'budget-3',
+    userId: '1',
+    category: 'software',
+    amount: 2000.00,
+    period: 'monthly',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  },
+  {
+    id: 'budget-4',
+    userId: '1',
+    category: 'rent',
+    amount: 10000.00,
+    period: 'monthly',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+  },
+  {
+    id: 'budget-5',
+    userId: '1',
+    category: 'office',
+    amount: 3000.00,
+    period: 'monthly',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
   },
 ];

@@ -138,3 +138,23 @@ export interface Analytics {
     amount: number;
   }[];
 }
+
+export interface Budget {
+  id: string;
+  userId: string;
+  category: TransactionCategory;
+  amount: number;
+  period: 'monthly';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BudgetPerformance {
+  budgetId: string;
+  category: TransactionCategory;
+  budgetAmount: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  status: 'good' | 'warning' | 'danger' | 'over';
+}

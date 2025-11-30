@@ -11,6 +11,7 @@ import Payments from './pages/Payments';
 import Invoices from './pages/Invoices';
 import Analytics from './pages/Analytics';
 import RecurringPayments from './pages/RecurringPayments';
+import Budgets from './pages/Budgets';
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { token, isLoading } = useAuth();
@@ -47,6 +48,7 @@ const App: React.FC = () => {
               <Route path="payments" element={<Payments />} />
               <Route path="recurring-payments" element={<RecurringPayments />} />
               <Route path="invoices" element={<Invoices />} />
+              <Route path="budgets" element={<Budgets />} />
               <Route path="analytics" element={<Analytics />} />
             </Route>
           </Routes>
