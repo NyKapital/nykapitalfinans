@@ -74,6 +74,22 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     });
   }
 
+  // Category breakdown (expenses by category)
+  const categoryBreakdown: Record<string, number> = {};
+  userTransactions
+    .filter((tx) => tx.type === 'outgoing' && tx.category)
+    .forEach((tx) => {
+      const category = tx.category!;
+      categoryBreakdown[category] = (categoryBreakdown[category] || 0) + Math.abs(tx.amount);
+    });
+
+  const categoryData = Object.entries(categoryBreakdown)
+    .map(([category, amount]) => ({
+      category,
+      amount,
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
   res.json({
     totalBalance,
     monthlyIncome,
@@ -84,6 +100,7 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     accountCount: userAccounts.length,
     overdueInvoiceCount: overdueInvoices.length,
     monthlyData,
+    categoryData,
   });
 });
 

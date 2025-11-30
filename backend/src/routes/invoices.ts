@@ -1,8 +1,9 @@
 import express, { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { invoices } from '../data/mockData';
+import { invoices, users } from '../data/mockData';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { Invoice } from '../types';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 const router = express.Router();
 
@@ -92,6 +93,33 @@ router.patch('/:id', authenticate, (req: AuthRequest, res: Response): void => {
   }
 
   res.json(invoice);
+});
+
+// Download invoice as PDF
+router.get('/:id/pdf', authenticate, (req: AuthRequest, res: Response): void => {
+  const invoice = invoices.find(
+    (inv) => inv.id === req.params.id && inv.userId === req.userId
+  );
+
+  if (!invoice) {
+    res.status(404).json({ error: 'Invoice not found' });
+    return;
+  }
+
+  const user = users.find((u) => u.id === req.userId);
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="faktura_${invoice.invoiceNumber}.pdf"`
+  );
+
+  generateInvoicePDF(invoice, user, res);
 });
 
 export default router;

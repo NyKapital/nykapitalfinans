@@ -18,6 +18,22 @@ export interface Account {
   createdAt: string;
 }
 
+export type TransactionCategory =
+  | 'salary'
+  | 'office'
+  | 'marketing'
+  | 'travel'
+  | 'software'
+  | 'equipment'
+  | 'rent'
+  | 'utilities'
+  | 'insurance'
+  | 'tax'
+  | 'sales'
+  | 'services'
+  | 'consulting'
+  | 'other';
+
 export interface Transaction {
   id: string;
   accountId: string;
@@ -27,6 +43,8 @@ export interface Transaction {
   description: string;
   counterparty: string;
   reference?: string;
+  category?: TransactionCategory;
+  tags?: string[];
   status: 'completed' | 'pending' | 'failed';
   createdAt: string;
   completedAt?: string;
@@ -41,9 +59,29 @@ export interface Payment {
   currency: string;
   description: string;
   reference: string;
+  category?: TransactionCategory;
   status: 'pending' | 'processing' | 'completed' | 'failed';
   createdAt: string;
   scheduledFor?: string;
+}
+
+export interface RecurringPayment {
+  id: string;
+  accountId: string;
+  recipientName: string;
+  recipientAccount: string;
+  amount: number;
+  currency: string;
+  description: string;
+  reference: string;
+  category?: TransactionCategory;
+  frequency: 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+  startDate: string;
+  nextPaymentDate: string;
+  endDate?: string;
+  status: 'active' | 'paused' | 'cancelled';
+  createdAt: string;
+  lastPaymentId?: string;
 }
 
 export interface Invoice {
@@ -84,5 +122,9 @@ export interface Analytics {
     month: string;
     income: number;
     expenses: number;
+  }[];
+  categoryData: {
+    category: string;
+    amount: number;
   }[];
 }
