@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, FileText, Eye, Mail, Check, Download, X, CheckCircle, DollarSign, ChevronDown, ChevronRight } from 'lucide-react';
+import { Plus, FileText, Eye, Mail, Download, X, CheckCircle, DollarSign, ChevronDown, ChevronRight } from 'lucide-react';
 import api from '../services/api';
 import { Invoice, InvoiceItem } from '../types';
 import { formatCurrency, formatDate } from '../utils/formatters';
@@ -141,8 +141,6 @@ const Invoices: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { subtotal, tax, total } = calculateTotals();
-
       // Calculate due date (30 days from now if not specified)
       const dueDate = formData.dueDate ||
         new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];

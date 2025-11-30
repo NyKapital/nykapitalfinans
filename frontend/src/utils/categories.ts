@@ -18,20 +18,20 @@ export const categoryLabels: Record<TransactionCategory, string> = {
 };
 
 export const categoryColors: Record<TransactionCategory, string> = {
-  salary: '#ef4444',
-  office: '#f97316',
-  marketing: '#f59e0b',
-  travel: '#84cc16',
-  software: '#10b981',
-  equipment: '#14b8a6',
-  rent: '#06b6d4',
-  utilities: '#0ea5e9',
-  insurance: '#3b82f6',
-  tax: '#6366f1',
-  sales: '#8b5cf6',
-  services: '#a855f7',
-  consulting: '#d946ef',
-  other: '#64748b',
+  salary: '#c5a065',      // Gold - income/salary
+  office: '#354b5e',      // Chart 2 - operational
+  marketing: '#657a8c',   // Chart 3 - growth
+  travel: '#9ba9b5',      // Chart 4 - variable
+  software: '#051c2c',    // Chart 1 - technology
+  equipment: '#0a2540',   // Navy - capital
+  rent: '#1b4030',        // Racing Green - fixed cost
+  utilities: '#678fb7',   // Primary 400 - utilities
+  insurance: '#163326',   // Green 600 - protection
+  tax: '#666666',         // Slate Grey - mandatory
+  sales: '#c5a065',       // Gold - revenue
+  services: '#8dabc9',    // Primary 300 - services
+  consulting: '#b3c7db',  // Primary 200 - consulting
+  other: '#c0c9d1',       // Chart 5 - miscellaneous
 };
 
 export function getCategoryLabel(category: TransactionCategory | undefined): string {
@@ -40,6 +40,6 @@ export function getCategoryLabel(category: TransactionCategory | undefined): str
 }
 
 export function getCategoryColor(category: TransactionCategory | undefined): string {
-  if (!category) return '#64748b';
-  return categoryColors[category] || '#64748b';
+  if (!category) return '#666666'; // Slate Grey
+  return categoryColors[category] || '#666666';
 }
