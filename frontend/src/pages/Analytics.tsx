@@ -3,6 +3,7 @@ import { TrendingUp, TrendingDown, DollarSign, FileText } from 'lucide-react';
 import api from '../services/api';
 import { Analytics as AnalyticsType } from '../types';
 import { formatCurrency } from '../utils/formatters';
+import { getCategoryLabel, getCategoryColor } from '../utils/categories';
 import {
   BarChart,
   Bar,
@@ -161,6 +162,36 @@ const Analytics: React.FC = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
+
+        {/* Category Breakdown */}
+        {analytics.categoryData && analytics.categoryData.length > 0 && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Udgifter per Kategori</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={analytics.categoryData.map((item) => ({
+                    name: getCategoryLabel(item.category as any),
+                    value: item.amount,
+                    color: getCategoryColor(item.category as any),
+                  }))}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {analytics.categoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getCategoryColor(entry.category as any)} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
 
         {/* Cash Flow Trend */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 lg:col-span-2">

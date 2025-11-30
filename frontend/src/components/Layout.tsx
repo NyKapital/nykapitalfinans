@@ -7,6 +7,7 @@ import {
   Send,
   FileText,
   BarChart3,
+  RefreshCw,
   LogOut,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -20,6 +21,7 @@ const Layout: React.FC = () => {
     { name: 'Konti', href: '/accounts', icon: CreditCard },
     { name: 'Transaktioner', href: '/transactions', icon: ArrowLeftRight },
     { name: 'Betalinger', href: '/payments', icon: Send },
+    { name: 'Tilbagevendende', href: '/recurring-payments', icon: RefreshCw },
     { name: 'Fakturaer', href: '/invoices', icon: FileText },
     { name: 'Statistik', href: '/analytics', icon: BarChart3 },
   ];
