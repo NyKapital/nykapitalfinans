@@ -7,14 +7,12 @@ import {
   FileText,
   AlertCircle,
   Send,
-  Download,
   ArrowDownLeft,
-  RefreshCw,
-  Plus
+  RefreshCw
 } from 'lucide-react';
 import api from '../services/api';
 import { Account, Transaction, Analytics, Invoice, RecurringPayment } from '../types';
-import { formatCurrency, formatDate, formatDateTime } from '../utils/formatters';
+import { formatCurrency, formatDate } from '../utils/formatters';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard: React.FC = () => {
@@ -196,8 +194,8 @@ const Dashboard: React.FC = () => {
               <YAxis />
               <Tooltip formatter={(value) => formatCurrency(Number(value))} />
               <Legend />
-              <Bar dataKey="income" name="Indkomst" fill="#10b981" />
-              <Bar dataKey="expenses" name="Udgifter" fill="#ef4444" />
+              <Bar dataKey="income" name="Indkomst" fill="#c5a065" />
+              <Bar dataKey="expenses" name="Udgifter" fill="#051c2c" />
             </BarChart>
           </ResponsiveContainer>
         </div>

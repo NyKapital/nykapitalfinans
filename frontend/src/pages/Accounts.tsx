@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CreditCard, Eye, Download } from 'lucide-react';
 import api from '../services/api';
 import { Account } from '../types';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { formatCurrency } from '../utils/formatters';
 
 const Accounts: React.FC = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);

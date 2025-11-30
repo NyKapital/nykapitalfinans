@@ -55,12 +55,10 @@ const Analytics: React.FC = () => {
     return <div className="text-center py-12">Ingen data tilgængelig</div>;
   }
 
-  const COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#ef4444'];
-
   const invoiceData = [
-    { name: 'Betalt', value: analytics.totalPaid, color: '#10b981' },
-    { name: 'Afventer', value: analytics.totalInvoiced - analytics.totalPaid - analytics.totalOverdue, color: '#0ea5e9' },
-    { name: 'Forfalden', value: analytics.totalOverdue, color: '#ef4444' },
+    { name: 'Betalt', value: analytics.totalPaid, color: '#1b4030' },
+    { name: 'Afventer', value: analytics.totalInvoiced - analytics.totalPaid - analytics.totalOverdue, color: '#657a8c' },
+    { name: 'Forfalden', value: analytics.totalOverdue, color: '#c5a065' },
   ];
 
   return (
@@ -125,8 +123,8 @@ const Analytics: React.FC = () => {
                 {formatCurrency(analytics.totalInvoiced)}
               </p>
             </div>
-            <div className="bg-blue-100 p-3 rounded-lg">
-              <FileText className="w-6 h-6 text-blue-600" />
+            <div className="bg-primary-100 p-3 rounded-lg">
+              <FileText className="w-6 h-6 text-primary-600" />
             </div>
           </div>
         </div>
@@ -144,8 +142,8 @@ const Analytics: React.FC = () => {
               <YAxis />
               <Tooltip formatter={(value) => formatCurrency(Number(value))} />
               <Legend />
-              <Bar dataKey="income" name="Indkomst" fill="#10b981" />
-              <Bar dataKey="expenses" name="Udgifter" fill="#ef4444" />
+              <Bar dataKey="income" name="Indkomst" fill="#c5a065" />
+              <Bar dataKey="expenses" name="Udgifter" fill="#051c2c" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -218,14 +216,14 @@ const Analytics: React.FC = () => {
                 type="monotone"
                 dataKey="income"
                 name="Indkomst"
-                stroke="#10b981"
+                stroke="#c5a065"
                 strokeWidth={2}
               />
               <Line
                 type="monotone"
                 dataKey="expenses"
                 name="Udgifter"
-                stroke="#ef4444"
+                stroke="#051c2c"
                 strokeWidth={2}
               />
             </LineChart>
@@ -235,8 +233,8 @@ const Analytics: React.FC = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-xl">
-          <p className="text-green-100 text-sm mb-2">Nettoindkomst (måned)</p>
+        <div className="bg-gradient-to-br from-green-500 to-green-700 text-white p-6 rounded-xl">
+          <p className="text-green-50 text-sm mb-2">Nettoindkomst (måned)</p>
           <p className="text-3xl font-bold">
             {formatCurrency(analytics.monthlyIncome - analytics.monthlyExpenses)}
           </p>
@@ -245,16 +243,16 @@ const Analytics: React.FC = () => {
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl">
-          <p className="text-blue-100 text-sm mb-2">Antal Konti</p>
+        <div className="bg-gradient-to-br from-primary-500 to-primary-700 text-white p-6 rounded-xl">
+          <p className="text-primary-50 text-sm mb-2">Antal Konti</p>
           <p className="text-3xl font-bold">{analytics.accountCount}</p>
-          <p className="text-blue-100 text-sm mt-2">Aktive konti</p>
+          <p className="text-primary-100 text-sm mt-2">Aktive konti</p>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-6 rounded-xl">
-          <p className="text-orange-100 text-sm mb-2">Forfaldne Fakturaer</p>
+        <div className="bg-gradient-to-br from-gold-500 to-gold-700 text-white p-6 rounded-xl">
+          <p className="text-gold-50 text-sm mb-2">Forfaldne Fakturaer</p>
           <p className="text-3xl font-bold">{analytics.overdueInvoiceCount}</p>
-          <p className="text-orange-100 text-sm mt-2">
+          <p className="text-gold-100 text-sm mt-2">
             {formatCurrency(analytics.totalOverdue)} i alt
           </p>
         </div>
