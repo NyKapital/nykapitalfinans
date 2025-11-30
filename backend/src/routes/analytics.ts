@@ -8,12 +8,27 @@ const router = express.Router();
 router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
   const userAccounts = accounts.filter((acc) => acc.userId === req.userId);
   const userAccountIds = userAccounts.map((acc) => acc.id);
-  const userTransactions = transactions.filter((tx) =>
+  let userTransactions = transactions.filter((tx) =>
     userAccountIds.includes(tx.accountId)
   );
   const userInvoices = invoices.filter((inv) => inv.userId === req.userId);
 
-  // Calculate total balance
+  // Apply date range filter if provided
+  const { startDate, endDate } = req.query;
+  let filteredTransactions = userTransactions;
+
+  if (startDate) {
+    const start = new Date(startDate as string);
+    filteredTransactions = filteredTransactions.filter((tx) => tx.createdAt >= start);
+  }
+
+  if (endDate) {
+    const end = new Date(endDate as string);
+    end.setHours(23, 59, 59, 999);
+    filteredTransactions = filteredTransactions.filter((tx) => tx.createdAt <= end);
+  }
+
+  // Calculate total balance (always current, not filtered)
   const totalBalance = userAccounts.reduce((sum, acc) => {
     if (acc.currency === 'DKK') return sum + acc.balance;
     // Simple conversion for demo (in production, use real exchange rates)
@@ -21,20 +36,13 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     return sum;
   }, 0);
 
-  // Calculate this month's income and expenses
-  const now = new Date();
-  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-  const thisMonthTransactions = userTransactions.filter(
-    (tx) => tx.createdAt >= firstDayOfMonth
-  );
-
-  const monthlyIncome = thisMonthTransactions
+  // Calculate income and expenses for the filtered period
+  const monthlyIncome = filteredTransactions
     .filter((tx) => tx.type === 'incoming')
     .reduce((sum, tx) => sum + tx.amount, 0);
 
   const monthlyExpenses = Math.abs(
-    thisMonthTransactions
+    filteredTransactions
       .filter((tx) => tx.type === 'outgoing')
       .reduce((sum, tx) => sum + tx.amount, 0)
   );
@@ -47,6 +55,7 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
   const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
   // Monthly transaction chart data (last 6 months)
+  const now = new Date();
   const monthlyData = [];
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -74,9 +83,9 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     });
   }
 
-  // Category breakdown (expenses by category)
+  // Category breakdown (expenses by category) - use filtered transactions
   const categoryBreakdown: Record<string, number> = {};
-  userTransactions
+  filteredTransactions
     .filter((tx) => tx.type === 'outgoing' && tx.category)
     .forEach((tx) => {
       const category = tx.category!;

@@ -1,8 +1,8 @@
 import express, { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { payments, accounts } from '../data/mockData';
+import { payments, accounts, transactions } from '../data/mockData';
 import { authenticate, AuthRequest } from '../middleware/auth';
-import { Payment } from '../types';
+import { Payment, Transaction } from '../types';
 
 const router = express.Router();
 
@@ -12,9 +12,47 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
     .filter((acc) => acc.userId === req.userId)
     .map((acc) => acc.id);
 
-  const userPayments = payments
-    .filter((pay) => userAccountIds.includes(pay.accountId))
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  let userPayments = payments
+    .filter((pay) => userAccountIds.includes(pay.accountId));
+
+  // Apply filters
+  const { startDate, endDate, search, category, status, accountId } = req.query;
+
+  if (accountId) {
+    userPayments = userPayments.filter((pay) => pay.accountId === accountId);
+  }
+
+  if (startDate) {
+    const start = new Date(startDate as string);
+    userPayments = userPayments.filter((pay) => pay.createdAt >= start);
+  }
+
+  if (endDate) {
+    const end = new Date(endDate as string);
+    end.setHours(23, 59, 59, 999);
+    userPayments = userPayments.filter((pay) => pay.createdAt <= end);
+  }
+
+  if (search) {
+    const searchLower = (search as string).toLowerCase();
+    userPayments = userPayments.filter(
+      (pay) =>
+        pay.recipientName.toLowerCase().includes(searchLower) ||
+        pay.description.toLowerCase().includes(searchLower) ||
+        pay.reference.toLowerCase().includes(searchLower)
+    );
+  }
+
+  if (category) {
+    userPayments = userPayments.filter((pay) => pay.category === category);
+  }
+
+  if (status) {
+    userPayments = userPayments.filter((pay) => pay.status === status);
+  }
+
+  // Sort by date descending
+  userPayments.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   res.json(userPayments);
 });
@@ -57,12 +95,34 @@ router.post('/', authenticate, (req: AuthRequest, res: Response): void => {
     currency: currency || account.currency,
     description,
     reference,
-    status: 'pending',
+    category: req.body.category,
+    status: 'completed', // Process immediately for MVP
     createdAt: new Date(),
     scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
   };
 
   payments.push(newPayment);
+
+  // Deduct from account balance
+  account.balance -= amount;
+
+  // Create corresponding transaction
+  const transaction: Transaction = {
+    id: uuidv4(),
+    accountId,
+    type: 'outgoing',
+    amount: -amount,
+    currency: currency || account.currency,
+    description,
+    counterparty: recipientName,
+    reference,
+    category: req.body.category,
+    status: 'completed',
+    createdAt: new Date(),
+    completedAt: new Date(),
+  };
+
+  transactions.push(transaction);
 
   res.status(201).json(newPayment);
 });
