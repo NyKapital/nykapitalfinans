@@ -55,6 +55,7 @@ router.get('/', authenticate, (req: AuthRequest, res: Response): void => {
   const totalOverdue = overdueInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
   // Monthly transaction chart data (last 6 months)
+  const now = new Date();
   const monthlyData = [];
   for (let i = 5; i >= 0; i--) {
     const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
