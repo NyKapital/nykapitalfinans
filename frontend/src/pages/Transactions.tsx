@@ -3,11 +3,13 @@ import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft } from 'lucide-re
 import api from '../services/api';
 import { Transaction } from '../types';
 import { formatCurrency, formatDateTime } from '../utils/formatters';
+import { getCategoryLabel, getCategoryColor } from '../utils/categories';
 
 const Transactions: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -31,6 +33,30 @@ const Transactions: React.FC = () => {
       tx.reference?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleExportCSV = async () => {
+    setExporting(true);
+    try {
+      const response = await api.get('/api/export/csv', {
+        responseType: 'blob',
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `transaktioner_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      alert('Kunne ikke eksportere transaktioner');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-12">Indlæser transaktioner...</div>;
   }
@@ -42,9 +68,13 @@ const Transactions: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Transaktioner</h1>
           <p className="text-gray-500">Oversigt over alle dine transaktioner</p>
         </div>
-        <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2">
+        <button
+          onClick={handleExportCSV}
+          disabled={exporting}
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 flex items-center gap-2 disabled:opacity-50"
+        >
           <Download className="w-4 h-4" />
-          Eksporter
+          {exporting ? 'Eksporterer...' : 'Eksporter CSV'}
         </button>
       </div>
 
@@ -77,6 +107,7 @@ const Transactions: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modtager/Afsender</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Beskrivelse</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reference</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dato</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Beløb</th>
@@ -102,6 +133,19 @@ const Transactions: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm text-gray-600">{tx.description}</p>
+                  </td>
+                  <td className="px-6 py-4">
+                    {tx.category && (
+                      <span
+                        className="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                        style={{
+                          backgroundColor: getCategoryColor(tx.category) + '20',
+                          color: getCategoryColor(tx.category),
+                        }}
+                      >
+                        {getCategoryLabel(tx.category)}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <p className="text-sm text-gray-500 font-mono">{tx.reference || '-'}</p>
